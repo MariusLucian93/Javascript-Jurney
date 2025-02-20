@@ -4,8 +4,15 @@ const itemList = document.getElementById('item-list');
 const clearButton = document.getElementById('clear');
 const filter = document.getElementById('filter')
 
+function displayItems () {
+    const itemsFromStorage = getItemsFromStorage();
+    itemsFromStorage.forEach((item) => addItemToDOM(item));
+
+    checkList();
+}
+
 //adds items in the shopping list
-function addItem (e) {
+function addItemSubmit (e) {
     e.preventDefault();
     //validate input
     const newItem = itemInput.value;
@@ -14,18 +21,26 @@ function addItem (e) {
         alert('Please add an item!');
         return;
     } 
-    //create list item
-    const li = document.createElement('li');
-    li.appendChild(document.createTextNode(newItem));
-    
-    const button = createButton('remove-item btn-link text-red');
-    li.appendChild(button);
 
-    //add li(item) to the DOM:
-    itemList.appendChild(li);
-
+    //adds the items to dom
+    addItemToDOM(newItem);
+    //adds items to localstorage
+    addItemToStorage(newItem);
     //check the li of elements:
     checkList();
+}
+
+//adding the items to the DOM:
+function addItemToDOM (item) {
+        //create list item
+        const li = document.createElement('li');
+        li.appendChild(document.createTextNode(item));
+        
+        const button = createButton('remove-item btn-link text-red');
+        li.appendChild(button);
+    
+        //add li(item) to the DOM:
+        itemList.appendChild(li);
 }
 
 //the fucntion that creates the button
@@ -55,10 +70,38 @@ function removeItem (e) {
     checkList();
 }
 
+//adds items to local storage
+function addItemToStorage (itemz) {
+    let itemsFromStorage = getItemsFromStorage();
+
+    //add new item to array:
+    itemsFromStorage.push(itemz);
+
+    //convert the JSON string to set to localstorage:
+    localStorage.setItem('items', JSON.stringify(itemsFromStorage));
+}
+
+//gets the items from local storage
+function getItemsFromStorage () {
+    let itemsFromStorage;
+
+    if (localStorage.getItem('items') === null) {
+        itemsFromStorage = [];
+    } else {
+        itemsFromStorage = JSON.parse(localStorage.getItem('items'));
+    }
+
+    return itemsFromStorage;
+}
+
 //function to enable Clear All items:
 function clearAll () {
-    while (itemList.firstChild) {
-        itemList.removeChild(itemList.firstChild);
+    if (itemList.removeChild(itemList.firstChild)) {
+        if (window.confirm('Are you sure that you want to clear the list?')) {
+            while (itemList.firstChild) {
+                itemList.removeChild(itemList.firstChild);
+            }
+        }
     }
     checkList();
 } 
@@ -79,7 +122,6 @@ function filterItems (e) {
     })
 }
 
-
 //function that checks if there are items listed in:
 //+shows/hides filter and clear all if no items are listed
 function checkList () {
@@ -94,9 +136,18 @@ function checkList () {
 
 }
 
+
+//Initialize app function: 
+function innit () {    
 //event Listeners:
-itemForm.addEventListener('submit', addItem);
+itemForm.addEventListener('submit', addItemSubmit);
 itemList.addEventListener('click', removeItem);
 clearButton.addEventListener('click', clearAll);
 filter.addEventListener('input', filterItems);
+document.addEventListener('DOMContentLoaded', displayItems);
+
+//check if there are any items:
 checkList();
+}
+
+innit();
