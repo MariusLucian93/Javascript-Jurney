@@ -2,8 +2,9 @@ const itemForm = document.getElementById('item-form');
 const itemInput = document.getElementById('item-input');
 const itemList = document.getElementById('item-list');
 const clearButton = document.getElementById('clear');
+const filter = document.getElementById('filter')
 
-
+//adds items in the shopping list
 function addItem (e) {
     e.preventDefault();
     //validate input
@@ -20,7 +21,11 @@ function addItem (e) {
     const button = createButton('remove-item btn-link text-red');
     li.appendChild(button);
 
+    //add li(item) to the DOM:
     itemList.appendChild(li);
+
+    //check the li of elements:
+    checkList();
 }
 
 //the fucntion that creates the button
@@ -40,10 +45,14 @@ function createIcon (classes) {
 }
 
 //function that allows the button 'X' to remove the item
+//added functionality where it asks the user y/n to remove added items
 function removeItem (e) {
     if(e.target.parentElement.classList.contains('remove-item')) {
+       if(window.confirm('Are you sure?')) {
         e.target.parentElement.parentElement.remove();
+       }
     }
+    checkList();
 }
 
 //function to enable Clear All items:
@@ -51,10 +60,25 @@ function clearAll () {
     while (itemList.firstChild) {
         itemList.removeChild(itemList.firstChild);
     }
-    console.log('works')
+    checkList();
 } 
+
+//function that checks if there are items listed in:
+//+shows/hides filter and clear all if no items are listed
+function checkList () {
+    const allItems = document.querySelectorAll('li');
+    if (allItems.length === 0) {
+        filter.style.display = 'none';
+        clearButton.style.display = 'none';
+    } else {
+        filter.style.display = 'block';
+        clearButton.style.display = 'block';    
+    }
+
+}
 
 //event Listeners:
 itemForm.addEventListener('submit', addItem);
 itemList.addEventListener('click', removeItem);
 clearButton.addEventListener('click', clearAll);
+checkList();
