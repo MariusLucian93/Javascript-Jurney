@@ -63,6 +63,23 @@ function clearAll () {
     checkList();
 } 
 
+//function that uses the filter to sort out listed items
+function filterItems (e) {
+    const allItems = document.querySelectorAll('li');
+    const text = e.target.value.toLowerCase();
+    
+    allItems.forEach((item) => {
+        const itemName = item.firstChild.textContent.toLowerCase();
+
+        if (itemName.indexOf(text) != -1) {
+            item.style.display = 'flex';
+        } else {
+            item.style.display = 'none';
+        }
+    })
+}
+
+
 //function that checks if there are items listed in:
 //+shows/hides filter and clear all if no items are listed
 function checkList () {
@@ -81,4 +98,5 @@ function checkList () {
 itemForm.addEventListener('submit', addItem);
 itemList.addEventListener('click', removeItem);
 clearButton.addEventListener('click', clearAll);
+filter.addEventListener('input', filterItems);
 checkList();
