@@ -2,7 +2,11 @@ const itemForm = document.getElementById('item-form');
 const itemInput = document.getElementById('item-input');
 const itemList = document.getElementById('item-list');
 const clearButton = document.getElementById('clear');
-const filter = document.getElementById('filter')
+const filter = document.getElementById('filter');
+const formButton = itemForm.querySelector('button');
+let isEditMode = false;
+
+
 
 function displayItems () {
     const itemsFromStorage = getItemsFromStorage();
@@ -21,6 +25,21 @@ function addItemSubmit (e) {
         alert('Please add an item!');
         return;
     } 
+
+    //check for edit mode:
+    if(isEditMode) {
+        const itemToEdit = itemList.querySelector('.edit-mode');
+
+        removeItemFromStorage(itemToEdit.textContent);
+        itemToEdit.classList.remove('edit-mode');
+        itemToEdit.remove();
+        isEditMode = false;
+    } else {
+        if (checkDuplcity(newItem)) {
+            alert('That item is Already There!');
+            return;
+        }
+    }
 
     //adds the items to dom
     addItemToDOM(newItem);
@@ -59,10 +78,30 @@ function createIcon (classes) {
     return icon;
 }
 
+//simply removes the tem on X
 function onClickItem (e) {
     if(e.target.parentElement.classList.contains('remove-item')) {
         removeItem(e.target.parentElement.parentElement);
+    } else {
+        setItemToEdit(e.target);
     }
+}
+
+//check if an item is already in the list so you do not have any doubles:
+function checkDuplcity (e) {
+    const itemsFromStorage = getItemsFromStorage();
+    return itemsFromStorage.includes(e);
+}
+
+//when you click on an listed item, it brings it in add for edit, if you want to edit it
+function setItemToEdit(e) {
+    isEditMode = true;
+    itemList.querySelectorAll('li').forEach((i) => i.classList.remove('edit-mode'));
+   
+    e.classList.add('edit-mode');
+    formButton.innerHTML = '<i class ="fa-solid fa-pen"></i> Update Item';
+    formButton.style.backgroundColor = 'green'; 
+    itemInput.value = e.textContent;
 }
 
 //function that allows the button 'X' to remove the item
@@ -151,6 +190,8 @@ function filterItems (e) {
 //function that checks if there are items listed in:
 //+shows/hides filter and clear all if no items are listed
 function checkList () {
+    itemInput.value = '';
+
     const allItems = document.querySelectorAll('li');
     if (allItems.length === 0) {
         filter.style.display = 'none';
@@ -159,6 +200,10 @@ function checkList () {
         filter.style.display = 'block';
         clearButton.style.display = 'block';    
     }
+
+    formButton.innerHTML = '<i class="fa-solid fa-plus"></i> Add Item';
+    formButton.style.backgroundColor = 'black'
+    isEditMode = false;
 
 }
 
