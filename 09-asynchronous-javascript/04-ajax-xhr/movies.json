@@ -1,7 +1,7 @@
 [
   {
     "title": "The Godfather",
-    "year": "1972"
+    "year": 1972
   },
   {
     "title": "Goodfellas",
@@ -10,5 +10,9 @@
   {
     "title": "A Bronx Tale",
     "year": 1993
+  },
+  {
+    "title": "Donnie Brasco",
+    "year": 1998
   }
 ]
