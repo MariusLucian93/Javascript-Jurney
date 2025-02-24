@@ -15,11 +15,15 @@ getApi.onreadystatechange = function () {
     
         joke.innerText = `${data.value}`;
 
+    } else {
+        joke.innerText = `Something Went Wrong!
+                                Try Again`
     }
 }
 
 
 button.addEventListener('click', getAnotherJoke);
+document.addEventListener('DOMContentLoaded', getAnotherJoke);
 
 function getAnotherJoke () {
     getApi.open('GET', 'https://api.chucknorris.io/jokes/random');
