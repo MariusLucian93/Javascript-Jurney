@@ -1,7 +1,12 @@
 const button = document.getElementById('generate');
 function fetchUser() {
     fetch('https://randomuser.me/api')
-    .then((res) => res.json())
+    .then((res) =>  {
+        if (res.status !== 200) {
+            throw new Error('Request Not found!');
+        }
+        return res.json()
+    })
     .then((data) => {
         displayUser(data.results[0]);
         changeData(data.results[0]);
