@@ -1,7 +1,19 @@
 const globalState = {
   currentPage: window.location.pathname,
+  search: {
+    term: ' ',
+    type: ' ',
+    page: 1,
+    totalPages: 1,
+    totalResults: 0
+  },
+  api: {
+    //this is my key from the TMDB.com public api, if you want you can go and get your own!
+    apiKey: 'fabe89ea1d10fdb347cfa088a3e43a57',
+    apiUrl: 'https://api.themoviedb.org/3/'
+  }
 }
-console.log(globalState.currentPage)
+
 
 //fetch the popular movies from the API
 async function displayPopularMovies() {
@@ -75,8 +87,6 @@ async function displayPopularShows() {
 async function displayShowDetails() {
   const showID = window.location.search.split('=')[1];
   const show = await fetchAPIData(`tv/${showID}`);
-  console.log(show);
-  console.log(show.last_episode_to_air.name);
   //overlay for background image
   displayBackgroundImage('show', show.backdrop_path);
 
@@ -212,6 +222,117 @@ function removeSpinner() {
   document.querySelector('.spinner').classList.remove('show');
 }
 
+//search movies/shows
+async function search() {
+  const queryString = window.location.search;
+  const urlParam = new URLSearchParams(queryString);
+
+
+  globalState.search.type = urlParam.get('type');
+  globalState.search.term = urlParam.get('search-term');
+
+  if(globalState.search.term != '' && globalState.search.term != null) {
+    const {results, total_pages, page, total_results} = await searchAPIData();
+
+    globalState.search.page = page;
+    globalState.search.totalPages = total_pages;
+    globalState.search.totalResults = total_results;
+
+    if(results.length === 0) {
+      showAlert('No results Found')
+      return;
+    }
+
+    displaySearchResults(results);
+
+    document.querySelector('#search-term').value = '';
+
+
+  } else {
+    showAlert('Please Enter Search Term', 'error');
+  }
+}
+
+//function to display the search results
+function displaySearchResults (results) {
+
+  //clear previous result;
+  document.querySelector('#search-results').innerHTML = '';
+  document.querySelector('#search-results-heading').innerHTML = '';
+  document.querySelector('#pagination').innerHTML = '';
+
+
+
+  results.forEach((result) => {
+    const div = document.createElement('div');
+    div.classList.add('card');
+    div.innerHTML = ` 
+          <a href="${globalState.search.type}-details.html?id=${result.id}">
+            ${result.poster_path
+        ? `<img
+              src="https://image.tmdb.org/t/p/w500${result.poster_path}"
+              class="card-img-top"
+              alt="${globalState.search.type === 'movie' ? result.title : result.name}"
+            />`
+        :
+        `<img
+              src="images/no-image.jpg" 
+              class="card-img-top"
+              alt="${globalState.search.type === 'movie' ? result.title : result.name}"
+            />`
+      }
+          </a>
+          <div class="card-body">
+            <h5 class="card-title">${globalState.search.type === 'movie' ? result.title : result.name}</h5>
+            <p class="card-text">
+              <small class="text-muted">Release: ${globalState.search.type === 'movie' ? result.release_date : result.first_air_date}</small>
+            </p>
+          </div>`;
+
+    document.querySelector('#search-results-heading').innerHTML = `
+      <h2>${results.length} of ${globalState.search.totalResults} results for ${globalState.search.term}</h2>
+    `
+    document.querySelector('#search-results').appendChild(div);
+  });
+
+  displayPagination();
+}
+
+//create and display pagination for search
+function displayPagination() {
+  const div = document.createElement('div');
+  div.classList.add('pagination');
+  div.innerHTML = `
+    <button class="btn btn-primary" id="prev">Prev</button>
+    <button class="btn btn-primary" id="next">Next</button>
+    <div class="page-counter">${globalState.search.page} of ${globalState.search.totalPages}</div>
+          `;
+  document.querySelector('#pagination').appendChild(div);
+
+  //disable previous and next buttons on first and last page
+
+  if (globalState.search.page === 1) {
+    document.querySelector('#prev').disabled = true;
+  } else if (globalState.search.page === globalState.search.totalPages) {
+    document.querySelector('#next').disabled = true;
+  }
+
+  // next page selection or previous
+  document.querySelector('#next').addEventListener('click', async () => {
+    globalState.search.page++;
+    const {results, totalPages} = await searchAPIData();
+    displaySearchResults(results);
+  });
+
+  document.querySelector('#prev').addEventListener('click', async () => {
+    globalState.search.page--;
+    const {results, totalPages} = await searchAPIData();
+    displaySearchResults(results);
+  })
+
+}
+
+
 //display Slider Movies
 async function displaySlider () {
   const {results} = await fetchAPIData('movie/now_playing');
@@ -297,13 +418,35 @@ function displayBackgroundImage (type, backgroundPath) {
 
 //fetch data from the TMDB API
 async function fetchAPIData(endpoint) {
-  const API_KEY = 'fabe89ea1d10fdb347cfa088a3e43a57';
-  const API_URL = 'https://api.themoviedb.org/3/';
+
+  //this is a key from a public API if you want u can just visit the TMDB.com and just fetch your own!
+  const API_KEY = globalState.api.apiKey;
+  const API_URL = globalState.api.apiUrl;
 
   showSpinner();
 
   const response = await fetch(`${API_URL}${endpoint}?api_key=${API_KEY}&language=en-US`);
 
+  const data = await response.json();
+
+  removeSpinner();
+
+  return data;
+
+}
+
+//make request to search:
+async function searchAPIData() {
+
+
+
+  const API_KEY = globalState.api.apiKey;
+  const API_URL = globalState.api.apiUrl;
+
+  showSpinner();
+
+  const response = await fetch(`${API_URL}search/${globalState.search.type}?api_key=${API_KEY}&language=en-US&query=${globalState.search.term}&page=${globalState.search.page}`);
+  
   const data = await response.json();
 
   removeSpinner();
@@ -323,6 +466,19 @@ function highlightLinks() {
   });
 }
 
+//show Alert:
+function showAlert (message, className = 'error') {
+  const alertEl = document.createElement('div');
+  alertEl.classList.add('alert', className);
+  alertEl.appendChild(document.createTextNode(message));
+  document.querySelector('#alert').appendChild(alertEl);
+
+
+  setTimeout(() => {
+    alertEl.remove()
+  }, 2000);
+}
+
 //a function that adds points or commas to fetched non splited numbers:
 function addCamasToNumbers(number) {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -334,26 +490,22 @@ function innit() {
     case '/11-flix-app-project/flixx-app/index.html':
       displayPopularMovies();
       displaySlider();
-      console.log('Home');
       break;
 
     case '/11-flix-app-project/flixx-app/shows.html':
-      console.log('Tv Shows');
       displayPopularShows();
       break;
 
     case '/11-flix-app-project/flixx-app/tv-details.html':
-      console.log('Show Details');
       displayShowDetails();
       break;
 
     case '/11-flix-app-project/flixx-app/movie-details.html':
-      console.log('Movie Details');
       desplayMovieDetails();
       break;
 
     case '/11-flix-app-project/flixx-app/search.html':
-      console.log('Search');
+      search();
       break;
   }
 
