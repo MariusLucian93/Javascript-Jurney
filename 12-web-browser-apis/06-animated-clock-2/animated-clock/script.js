@@ -1,104 +1,131 @@
-function clock() {
-  const now = new Date();
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
+const canvas = document.getElementById('canvas');
 
-  // Setup canvas
-  ctx.save(); // save the default state
-  ctx.clearRect(0, 0, 500, 500);
-  ctx.translate(250, 250); // Put 0,0 in the middle
-  ctx.rotate(-Math.PI / 2); // Rotate clock -90deg
+const faceColor = document.getElementById('face-color');
+const borderColor = document.getElementById('border-color');
+const numberColor = document.getElementById('line-color');
+const largeHandColor = document.getElementById('large-hand-color');
+const minHandColor = document.getElementById('second-hand-color');
 
-  // Set default styles
-  ctx.strokeStyle = '#000000';
-  ctx.fillStyle = '#f4f4f4';
-  ctx.lineWidth = 5;
-  ctx.lineCap = 'round';
+borderColor.value = 'ffffff';
+console.log(borderColor.value);
 
-  // Draw clock face/border
-  ctx.save();
-  ctx.beginPath();
-  ctx.lineWidth = 14;
-  ctx.strokeStyle = '#800000';
-  ctx.arc(0, 0, 142, 0, Math.PI * 2, true);
-  ctx.stroke();
-  ctx.fill();
-  ctx.restore();
 
-  // Draw hour lines
-  ctx.save();
-  for (let i = 0; i < 12; i++) {
-    ctx.beginPath();
-    ctx.rotate(Math.PI / 6);
-    ctx.moveTo(100, 0);
-    ctx.lineTo(120, 0);
-    ctx.stroke();
-  }
-  ctx.restore();
 
-  // Draw minute lines
-  ctx.save();
-  ctx.lineWidth = 4;
-  for (let i = 0; i < 60; i++) {
-    if (i % 5 !== 0) {
-      ctx.beginPath();
-      ctx.moveTo(117, 0);
-      ctx.lineTo(120, 0);
-      ctx.stroke();
+
+function clock () {
+    const now = new Date();
+    const CTX = canvas.getContext('2d');
+
+
+    //setup canvas
+    CTX.save(); //saves the default state
+    CTX.clearRect(0, 0, 500, 500);
+    CTX.translate(250, 250); //put 0,0 in the middle
+    CTX.rotate(-Math.PI / 2); //rotate clock -90degrees
+
+    //set default styles
+    CTX.strokeStyle = 'black';
+    CTX.fillStyle = faceColor.value;
+    CTX.lineWidth = 5;
+    CTX.lineCap = 'round';
+
+    //draw clock face/border
+    CTX.save();
+    CTX.beginPath();
+    CTX.lineWidth = 14;
+    CTX.strokeStyle = borderColor.value;
+    CTX.arc(0, 0, 130, 0, Math.PI * 2, true);
+    CTX.stroke();
+    CTX.fill();
+    CTX.restore();
+
+    //draw hour marks
+    CTX.save();
+    CTX.strokeStyle = numberColor.value;
+    for (let i = 0; i < 12; i++) {
+        CTX.rotate(Math.PI / 6);
+        CTX.beginPath();
+        CTX.moveTo(100, 0);
+        CTX.lineTo(120, 0);
+        CTX.stroke();
     }
-    ctx.rotate(Math.PI / 30);
-  }
-  ctx.restore();
+    CTX.restore();
 
-  // Get current time
-  const hr = now.getHours() % 12;
-  const min = now.getMinutes();
-  const sec = now.getSeconds();
+    //draw minute marks
+    CTX.save();
+    CTX.lineWidth = 4;
+    CTX.strokeStyle = numberColor.value;
+    for (let i = 0; i < 60; i++) {
+        if (i % 5 !== 0) {
+            CTX.beginPath();
+            CTX.moveTo(120, 0);
+            CTX.lineTo(120, 0);
+            CTX.stroke();
+        }
+    CTX.rotate(Math.PI / 30);
+    }
 
-  // console.log(`${hr}:${min}:${sec}`);
+    CTX.restore();
 
-  // Draw hour hand
-  ctx.save();
-  ctx.rotate(
-    (Math.PI / 6) * hr + (Math.PI / 360) * min + (Math.PI / 21600) * sec
-  );
-  ctx.strokeStyle = '#800000';
-  ctx.lineWidth = 14;
-  ctx.beginPath();
-  ctx.moveTo(-20, 0);
-  ctx.lineTo(80, 0);
-  ctx.stroke();
-  ctx.restore();
 
-  // Draw min hand
-  ctx.save();
-  ctx.rotate((Math.PI / 30) * min + (Math.PI / 1800) * sec);
-  ctx.strokeStyle = '#800000';
-  ctx.lineWidth = 10;
-  ctx.beginPath();
-  ctx.moveTo(-28, 0);
-  ctx.lineTo(112, 0);
-  ctx.stroke();
-  ctx.restore();
+    //get current time
+    const hr = now.getHours() % 12;
+    const min = now.getMinutes();
+    const sec = now.getSeconds();
 
-  // Draw sec hand
-  ctx.save();
-  ctx.rotate((sec * Math.PI) / 30);
-  ctx.strokeStyle = '#FF7F50';
-  ctx.fillStyle = '#FF7F50';
-  ctx.lineWidth = 6;
-  ctx.beginPath();
-  ctx.moveTo(-30, 0);
-  ctx.lineTo(100, 0);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.arc(0, 0, 10, 0, Math.PI * 2, true);
-  ctx.fill();
-  ctx.restore();
+    // console.log(`time is: ${hr}:${min}:${sec}`);
 
-  ctx.restore(); // restore default state
 
-  requestAnimationFrame(clock);
+    //draw HOUR hand
+    CTX.save();
+    CTX.rotate((Math.PI / 30) * min + (Math.PI / 1800) * sec);
+    CTX.strokeStyle = largeHandColor.value;
+    CTX.lineWidth = 10;
+    CTX.beginPath();
+    CTX.moveTo(-20, 0);
+    CTX.lineTo(80, 0); 
+    CTX.stroke();
+    CTX.restore();
+
+
+    //draw MINUTE hand
+    CTX.save();
+    CTX.rotate((Math.PI / 6) * hr + (Math.PI / 360) * min + (Math.PI / 21600) * sec);
+    CTX.strokeStyle = largeHandColor.value;
+    CTX.lineWidth = 14;
+    CTX.beginPath();
+    CTX.moveTo(-20, 0);
+    CTX.lineTo(80, 0); 
+    CTX.stroke();
+    CTX.restore();
+
+    //draw SECOND hand
+    CTX.save();
+    CTX.rotate((sec * Math.PI / 30));
+    CTX.strokeStyle = minHandColor.value;
+    CTX.fillStyle = minHandColor.value;
+    CTX.lineWidth = 5;
+    CTX.beginPath();
+    CTX.moveTo(-25, 0);
+    CTX.lineTo(90, 0); 
+    CTX.stroke();
+    CTX.beginPath();
+    CTX.arc(0, 0, 5, 0, Math.PI * 2, true);
+    CTX.fill();
+    CTX.restore();
+
+    CTX.restore(); //restores to default state 
+
+    requestAnimationFrame(clock);
 }
-
 requestAnimationFrame(clock);
+clock();
+
+
+document.getElementById('save-btn').addEventListener('click', () => {
+    const dataURL = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.download = 'clock.png';
+    link.href = dataURL;
+    link.click();
+})
